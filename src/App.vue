@@ -1,5 +1,5 @@
 <template>
-  <b-container id="app">
+  <b-container id="app" >
     <TheTitleBar :title="title"/>
     <router-view></router-view>
   </b-container>
@@ -54,6 +54,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 30px;
+  margin-outside: 30px;
 }
 </style>

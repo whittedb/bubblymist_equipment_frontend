@@ -13,7 +13,7 @@
                 </b-button>
             </b-col>
         </b-row>
-        <b-table ref="machine_list_table" striped hover head-variant="dark"
+        <b-table ref="machine_list_table" striped hover table-variant="success" head-variant="light"
                  primary-key="id" :items="machineList" :fields="fields" :busy="loading"
                  sticky-header="600px" no-border-collapse
                  selectable select-mode="single" @row-selected="onRowSelected"
@@ -37,15 +37,46 @@
                 <b-checkbox :id="`active_${data.item.id}`" v-model="data.item.active"
                             :checked="data.item.active" @input="handleActiveChange(data.item)"/>
             </template>
+            <template v-slot:cell(create_repair_log)="data">
+                <b-button pill class="p-1 mb-0" variant="primary"
+                          :to="{name: 'CreateRepairLog', params: {id: null, machine_id: data.item.id}}">
+                    <span>Create</span>
+                </b-button>
+            </template>
             <template v-slot:row-details="row">
                 <b-card class="repair_log_card">
-                    <b-table striped head-variant="dark"
+                    <b-table striped table-variant="primary" head-variant="light"
                              primary-key="id" :items="row.item['repair_logs']" :fields="detailFields"
-                             sticky-header="true" no-border-collapse sort-by="date">
+                             no-border-collapse sort-by="date">
+                        <template v-slot:thead-top>
+                            <b-tr class="mb-2" align-v="center" >
+                                <b-td colspan="12">
+                                    <b-container>
+                                        <b-row>
+                                            <b-col cols="3">
+                                                <b-button pill class="p-1 mb-0" variant="primary"
+                                                          :to="{name: 'CreateRepairLog', params: {id: null}}">
+                                                    Create Log
+                                                </b-button>
+                                            </b-col>
+                                            <b-col cols="6">
+                                                <b>Repair Logs</b>
+                                            </b-col>
+                                        </b-row>
+                                    </b-container>
+                                </b-td>
+                            </b-tr>
+                        </template>
                         <template v-slot:cell(date)="data">
                             <b-link :to="{name: 'EditRepairLog', params: {id: data.item.id}}">
                                 {{dateFieldFormatter(data.item.date)}}
                             </b-link>
+                        </template>
+                        <template v-slot:cell(delete_repair_log)="data">
+                            <b-button pill class="p-1 mb-0" variant="primary"
+                                      @click="deleteRepairLog(data.item.id)">
+                                <span>Delete</span>
+                            </b-button>
                         </template>
                     </b-table>
                 </b-card>
@@ -118,7 +149,9 @@
                             return this.repairInfo[item.id]["laborCost"]
                         }
                     },
-                    {key: "active"}
+                    {key: "active"},
+                    {key: "create_repair_log", label: "Repair Log"
+                    }
                 ],
                 detailFields: [
                     {key: "date", sortable: true},
@@ -126,7 +159,8 @@
                     {key: "part_number", sortable: true},
                     {key: "part_name", sortable: true},
                     {key: "part_cost", sortable: true},
-                    {key: "labor_cost", sortable: true}
+                    {key: "labor_cost", sortable: true},
+                    {key: "delete_repair_log", label: "Delete Log"}
                 ],
                 machineList: [],
                 repairInfo: {},
@@ -169,8 +203,28 @@
                 this.error = null
                 this.$http.request(options)
                     // eslint-disable-next-line no-unused-vars
+                    .catch((error) => {
+                        this.updateError(error)
+                    })
+            },
+            deleteRepairLog(repair_log_id) {
+                const options = {
+                    url: `/repair_log/${repair_log_id}`,
+                    method: "delete",
+                }
+                this.error = null
+                this.$http.request(options)
+                    // eslint-disable-next-line no-unused-vars
                     .then((response) => {
-
+                        for (let machine_i = 0; machine_i < this.machineList.length; ++machine_i) {
+                            let logs = this.machineList[machine_i]["repair_logs"]
+                            for (let log_i = 0; log_i < logs.length; ++log_i) {
+                                if (logs[log_i].id === repair_log_id) {
+                                    logs.splice(log_i, 1)
+                                    break
+                                }
+                            }
+                        }
                     })
                     .catch((error) => {
                         this.updateError(error)
@@ -215,15 +269,9 @@
                 }
             }
         },
-        onCreateMachine() {
-
-        }
     }
 
 </script>
 
 <style scoped>
-    .repair_log_card {
-        background: #a0bed9;
-    }
 </style>

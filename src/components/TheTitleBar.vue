@@ -1,14 +1,16 @@
 <template>
-    <b-row class="mb-5">
-        <b-col class="logo_image" cols="1">
-            <b-link to="/">
-                <b-img src="../assets/logo_800x617.png" :alt="version" height="70"></b-img>
-            </b-link>
-        </b-col>
-        <b-col class="title" cols="11">
-            <h1>{{ title }}</h1>
-        </b-col>
-    </b-row>
+    <b-container>
+        <b-row class="mb-5">
+            <b-col class="logo_image" cols="1">
+                <b-link to="/">
+                    <b-img src="../assets/logo_800x617.png" :alt="version" height="70"></b-img>
+                </b-link>
+            </b-col>
+            <b-col class="title" cols="11">
+                <h1>{{ title }}</h1>
+            </b-col>
+        </b-row>
+    </b-container>
 </template>
 
 <script>

@@ -6,12 +6,53 @@ import "bootstrap-vue/dist/bootstrap-vue.css"
 import Axios from "axios"
 import http from "http"
 import https from "https"
-//import "https://unpkg.com/vue/dist/vue.js"
-//import "https://unpkg.com/vue-router/dist/vue-router.js"
+import {
+  ValidationObserver,
+  ValidationProvider,
+  extend,
+  localize
+} from "vee-validate"
+import en from "vee-validate/dist/locale/en.json"
+import * as rules from "vee-validate/dist/rules"
+
 import App from "./App.vue"
 import MachineList from "@/components/MachineList";
 import EditMachine from "@/components/EditMachine";
 import EditRepairLog from "@/components/EditRepairLog";
+
+// Install VeeValidate rules and localization
+Object.keys(rules).forEach(rule => {
+  extend(rule, rules[rule]);
+})
+extend("decimal", {
+  validate: (value, { decimals = '*', separator = '.' } = {}) => {
+    if (value === null || value === undefined || value === '') {
+      return {
+        valid: false
+      };
+    }
+    if (Number(decimals) === 0) {
+      return {
+        valid: /^-?\d*$/.test(value),
+      };
+    }
+    const regexPart = decimals === '*' ? '+' : `{1,${decimals}}`;
+    const regex = new RegExp(`^[-+]?\\d*(\\${separator}\\d${regexPart})?([eE]{1}[-]?\\d+)?$`);
+    return {
+      valid: regex.test(value),
+      data: {
+        serverMessage: 'Only decimal values are available'
+      }
+    };
+  },
+  message: `{serverMessage}`
+})
+localize("en", en)
+
+// Install VeeValidate components globally
+Vue.component("ValidationObserver", ValidationObserver);
+Vue.component("ValidationProvider", ValidationProvider);
+
 
 const equipmentApi = Axios.create({
   baseURL: process.env.VUE_APP_EQUIPMENT_MANAGER_BASE_URL,
