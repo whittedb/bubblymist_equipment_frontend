@@ -43,9 +43,9 @@
                              primary-key="id" :items="row.item['repair_logs']" :fields="detailFields"
                              sticky-header="true" no-border-collapse sort-by="date">
                         <template v-slot:cell(date)="data">
-                            <a href="http://localhost:8080">
-                                {{data.item.date}}
-                            </a>
+                            <b-link :to="{name: 'EditRepairLog', params: {id: data.item.id}}">
+                                {{dateFieldFormatter(data.item.date)}}
+                            </b-link>
                         </template>
                     </b-table>
                 </b-card>
@@ -152,6 +152,8 @@
                     partsCost += repairLogs[i]["part_cost"]
                     laborCost += repairLogs[i]["labor_cost"]
                 }
+                partsCost = partsCost.toFixed(2)
+                laborCost = laborCost.toFixed(2)
                 this.repairInfo[item.id] = {
                     numRepairs: repairLogs.length,
                     partsCost: partsCost,
@@ -176,6 +178,9 @@
             },
             machineFieldFormatter(item) {
                 return (item.type === 0 ? "Washer " : "Dryer ") + item.number.toString()
+            },
+            dateFieldFormatter(date) {
+                return `${date.substring(5, 7)}/${date.substring(8)}/${date.substring(0, 4)}`
             },
             onRowSelected(items) {
                 this.machineList.forEach(item => this.$set(item, '_showDetails', false))

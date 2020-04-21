@@ -191,7 +191,8 @@
             }
         },
         methods: {
-            onSubmit() {
+            onSubmit(evt) {
+                evt.preventDefault()
                 const options = {
                     url: `/${this.machineType.toLowerCase()}`,
                     method: this.isCreate ? "post" : "put",
@@ -207,14 +208,16 @@
                         this.updateError(error)
                     })
             },
-            async onReset() {
+            async onReset(evt) {
+                evt.preventDefault()
                 this.loaded = false
                 await this.$nextTick()
                 this.dirty = false
                 this.updatedMachine = Object.assign({}, this.originalMachine)
                 this.loaded = true
             },
-            onCancel() {
+            onCancel(evt) {
+                evt.preventDefault()
                 this.$router.push({name: "Home"})
             },
             watchUpdated() {

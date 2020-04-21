@@ -11,6 +11,7 @@ import https from "https"
 import App from "./App.vue"
 import MachineList from "@/components/MachineList";
 import EditMachine from "@/components/EditMachine";
+import EditRepairLog from "@/components/EditRepairLog";
 
 const equipmentApi = Axios.create({
   baseURL: process.env.VUE_APP_EQUIPMENT_MANAGER_BASE_URL,
@@ -58,6 +59,18 @@ const routes = [
     path: "/createmachine",
     name: "CreateMachine",
     component: EditMachine,
+    props: true
+  },
+  {
+    path: "/editrepairlog/:id",
+    name: "EditRepairLog",
+    component: EditRepairLog,
+    props: true
+  },
+  {
+    path: "/editrepairlog",
+    name: "CreateRepairLog",
+    component: EditRepairLog,
     props: true
   },
 ]
