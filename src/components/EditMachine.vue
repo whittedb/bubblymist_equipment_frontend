@@ -14,23 +14,30 @@
                     label-for="type">
                 <b-form-select id="type" required v-model="updatedMachine.type" :options="typeOptions" :value="null"/>
             </b-form-group>
-            <b-form-group
-                    id="fieldset-1"
-                    label-cols-sm="2"
-                    label-align-sm="left"
-                    description="Enter the machine number"
-                    label="Machine Number:"
-                    label-for="number"
-                    :invalid-feedback="numberInvalidFeedback"
-                    :valid-feedback="numberValidFeedback"
-                    :state="numberState">
+            <b-form-group id="fieldset-1"
+                          label-cols-sm="2"
+                          description="Enter a description"
+                          label="Description"
+                          label-for="description">
+                <b-form-input id="description" v-model="updatedMachine.description"
+                              :disabled="isCreate && updatedMachine.type == null"/>
+            </b-form-group>
+            <b-form-group id="fieldset-2"
+                          label-cols-sm="2"
+                          label-align-sm="left"
+                          description="Enter the machine number"
+                          label="Machine Number:"
+                          label-for="number"
+                          :invalid-feedback="numberInvalidFeedback"
+                          :valid-feedback="numberValidFeedback"
+                          :state="numberState">
                 <b-form-input id="number" v-model="updatedMachine.number"
                               :disabled="isCreate && updatedMachine.type == null"
                               :state="numberState" type="number" number/>
 
             </b-form-group>
             <b-form-group
-                    id="fieldset-2"
+                    id="fieldset-3"
                     label-cols-sm="2"
                     label-align-sm="left"
                     description="Enter the machines model number"
@@ -40,7 +47,7 @@
                               :disabled="isCreate && updatedMachine.type == null"/>
             </b-form-group>
             <b-form-group
-                    id="fieldset-3"
+                    id="fieldset-4"
                     label-cols-sm="2"
                     label-align-sm="left"
                     description="Enter the machines serial number"
@@ -50,7 +57,7 @@
                               :disabled="isCreate && updatedMachine.type == null"/>
             </b-form-group>
             <b-form-group
-                    id="fieldset-4"
+                    id="fieldset-5"
                     label-cols-sm="2"
                     label-align-sm="left"
                     description="Enabled or Disabled"
@@ -59,7 +66,7 @@
                 <b-form-checkbox id="active" v-model="updatedMachine.active" switch
                                  :disabled="isCreate && updatedMachine.type == null"/>
             </b-form-group>
-            <b-form-group id="fieldset-5">
+            <b-form-group id="fieldset-buttons">
                 <b-button-group>
                     <b-button pill class="mx-2" variant="danger" type="cancel" @click="onCancel">Cancel</b-button>
                     <b-button v-if="isCreate && createable"
@@ -178,6 +185,7 @@
                     id: null,
                     type: null,
                     number: "",
+                    description: "",
                     model: "",
                     serial: "",
                     active: true
@@ -234,7 +242,8 @@
                     this.dirty = this.originalMachine.number !== this.updatedMachine.number ||
                         this.originalMachine.model !== this.updatedMachine.model ||
                         this.originalMachine.serial !== this.updatedMachine.serial ||
-                        this.originalMachine.active !== this.updatedMachine.active;
+                        this.originalMachine.active !== this.updatedMachine.active ||
+                        this.originalMachine.description !== this.updatedMachine.description;
                 }
             },
             updateError(error) {

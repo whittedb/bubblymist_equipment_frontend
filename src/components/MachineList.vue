@@ -2,23 +2,21 @@
     <div class="machine_list">
         <b-row class="mb-2" align-v="center">
             <b-col cols="3">
-                <b-form-checkbox v-model="filter" value="include_inactive" unchecked-value="active_only"
-                                 inline>Show Inactive</b-form-checkbox>
-            </b-col>
-            <b-col cols="6"></b-col>
-            <b-col cols="3">
-                <b-button pill class="p-2 mb-2" variant="primary"
-                          :to="{name: 'CreateMachine', params: {id: null, usedNumbers: usedNumbers}}">
-                    Create Machine
-                </b-button>
+                <b-form-checkbox v-model="filter.active" inline
+                                 value="include_inactive"
+                                 unchecked-value="active_only"
+                                 :disabled="inactiveCount === 0">
+                    Show Inactive
+                </b-form-checkbox>
             </b-col>
         </b-row>
         <b-table ref="machine_list_table" striped hover table-variant="success" head-variant="light"
-                 primary-key="id" :items="machineList" :fields="fields" :busy="loading"
+                 primary-key="id" :items="dataProvider" no-provider-filtering no-provider-paging no-provider-sorting
+                 :fields="fields" :busy.sync="isBusy"
                  sticky-header="600px" no-border-collapse
                  selectable select-mode="single" @row-selected="onRowSelected"
                  sort-by="type"
-                 :filter="filter" :filter-function="customFilter" @filtered="onFiltered">
+                 :filter="filter.active" :filter-function="customFilter" @filtered="onFiltered">
             <template v-slot:table-busy>
                 <div class="text-center text-danger my-2">
                     <b-spinner class="align-middle"></b-spinner>
@@ -26,7 +24,17 @@
                 </div>
             </template>
             <template v-slot:thead-top>
-                <b-tr><b-td colspan="12"><b>Machines</b></b-td></b-tr>
+                <b-tr>
+                    <b-td colspan="10" style="text-align: center">
+                        <b-link :to="{name: 'CreateMachine', params: {id: null, usedNumbers: usedNumbers}}">
+                            <b-icon-hammer/>
+                        </b-link>
+                        &nbsp;<b>Machines</b>
+                    </b-td>
+                </b-tr>
+            </template>
+            <template v-slot:cell(icon)="data">
+                <b-icon-wrench v-if="data.item['repair_logs'].length > 0" variant="danger"/>
             </template>
             <template v-slot:cell(type)="data">
                 <b-link :to="{name: 'EditMachine', params: {id: data.item.id, usedNumbers: usedNumbers}}">
@@ -38,10 +46,9 @@
                             :checked="data.item.active" @input="handleActiveChange(data.item)"/>
             </template>
             <template v-slot:cell(create_repair_log)="data">
-                <b-button pill class="p-1 mb-0" variant="primary"
-                          :to="{name: 'CreateRepairLog', params: {id: null, machine_id: data.item.id}}">
-                    <span>Create</span>
-                </b-button>
+                <b-link class="create_log" :to="{name: 'CreateRepairLog', params: {id: null, machine_id: data.item.id}}">
+                    <b-icon-hammer/>
+                </b-link>
             </template>
             <template v-slot:row-details="row">
                 <b-card class="repair_log_card">
@@ -81,21 +88,21 @@
                     </b-table>
                 </b-card>
             </template>
-            <template v-slot:custom-foot>
-                <b-td>Total: {{totalRows}} of {{machineCnt}}</b-td>
-                <b-td>Washers: {{washerRows}}</b-td>
-                <b-td>Dryers: {{dryerRows}}</b-td>
-            </template>
         </b-table>
+        <b-row class="mb-2">
+            <b-col cols="2">Total: {{totalRows}} of {{machineCnt}}</b-col>
+            <b-col cols="2">Washers: {{washerRows}}</b-col>
+            <b-col cols="2">Dryers: {{dryerRows}}</b-col>
+            <b-col>Inactive: {{inactiveCount}}</b-col>
+        </b-row>
     </div>
 </template>
 
 <script>
     export default {
         name: "MachineList",
-        components: {},
         computed: {
-            machineCnt: function () {
+            machineCnt() {
                 return this.machineList.length
             },
             usedNumbers() {
@@ -106,26 +113,35 @@
                     }
                 })
                 return used_numbers
+            },
+            inactiveCount() {
+                let cnt = 0
+                this.machineList.forEach(machine => cnt += machine.active ? 0 : 1)
+                return cnt
             }
         },
         data: function () {
             return {
-                loading: false,
+                isBusy: false,
                 totalRows: 0,
                 washerRows: 0,
                 dryerRows: 0,
-                filter: "active_only",
+                filter: {
+                    active: "active_only"
+                },
                 filterOn: ["active"],
                 fields: [
+                    {key: "icon", label: ""},
                     {key: "type", label: "Machine",
                         sortable: true,
                         sortByFormatted: (value, key, item) => {
                             return ("000" + item.type).slice(-2) + ("000000" + item.number).slice(-5)
                         }
                     },
-                    {key: "model", sortable: true},
+                    {key: "description", sortable: true, thStyle: {"text-align": "center"}},
+                    {key: "model", sortable: true, thStyle: {"text-align": "center"}},
                     "serial",
-                    {key: "numrepairs", label: "Repairs", sortable: true,
+                    {key: "numrepairs", label: "Repairs", sortable: true, thStyle: {"text-align": "center"},
                         formatter: (value, key, item) => {
                             return this.repairInfo[item.id]["numRepairs"]
                         },
@@ -134,6 +150,7 @@
                         }
                     },
                     {key: "partscost", label: "Parts Cost", sortable: true,
+                        thStyle: {"text-align": "center"}, tdClass: "bmapp-money",
                         formatter: (value, key, item) => {
                             return this.repairInfo[item.id]["partsCost"]
                         },
@@ -142,6 +159,7 @@
                         }
                     },
                     {key: "laborcost", label: "Labor Cost", sortable: true,
+                        thStyle: {"text-align": "center"}, tdClass: "bmapp-money",
                         formatter: (value, key, item) => {
                             return this.repairInfo[item.id]["laborCost"]
                         },
@@ -149,9 +167,9 @@
                             return this.repairInfo[item.id]["laborCost"]
                         }
                     },
-                    {key: "active"},
-                    {key: "create_repair_log", label: "Repair Log"
-                    }
+                    {key: "active",
+                        thStyle: {"text-align": "center"}, tdClass: "bmapp-checkbox"},
+                    {key: "create_repair_log", label: ""}
                 ],
                 detailFields: [
                     {key: "date", sortable: true},
@@ -167,33 +185,34 @@
                 error: {},
             }
         },
-        mounted() {
-            this.loading = true;
-            this.$http.get("/equipment_list/all")
-                .then(response => {
-                    response.data.forEach(this.addMachine)
-                }).catch(error => {
-                    this.updateError(error)
-                }).finally(() => this.loading = false);
-        },
         methods: {
-            addMachine(item) {
-                item["_showDetails"] = false
+            dataProvider(ctx, callback) {
+                this.$http.get("/equipment_list/all")
+                    .then(response => {
+                        response.data.forEach(this.addMachine)
+                        callback(this.machineList)
+                    }).catch(error => {
+                    this.updateError(error)
+                    callback([])
+                });
+            },
+            addMachine(machine) {
+                machine["_showDetails"] = false
                 let partsCost = 0
                 let laborCost = 0
-                let repairLogs = item["repair_logs"]
+                let repairLogs = machine["repair_logs"]
                 for (let i = 0; i < repairLogs.length; ++i) {
                     partsCost += repairLogs[i]["part_cost"]
                     laborCost += repairLogs[i]["labor_cost"]
                 }
                 partsCost = partsCost.toFixed(2)
                 laborCost = laborCost.toFixed(2)
-                this.repairInfo[item.id] = {
+                this.repairInfo[machine.id] = {
                     numRepairs: repairLogs.length,
                     partsCost: partsCost,
                     laborCost: laborCost,
                 }
-                this.machineList.push(item)
+                this.machineList.push(machine)
             },
             handleActiveChange(item) {
                 const options = {
@@ -202,6 +221,12 @@
                 }
                 this.error = null
                 this.$http.request(options)
+                    // eslint-disable-next-line no-unused-vars
+                    .then(response => {
+                        if (this.inactiveCount === 0) {
+                            this.filter.active = "active_only"
+                        }
+                    })
                     // eslint-disable-next-line no-unused-vars
                     .catch((error) => {
                         this.updateError(error)
@@ -273,5 +298,17 @@
 
 </script>
 
+<style>
+    .bmapp-money {
+        text-align: right;
+    }
+    .bmapp-checkbox {
+        text-align: center;
+    }
+</style>
+
 <style scoped>
+    .create_log {
+        alignment: center;
+    }
 </style>
