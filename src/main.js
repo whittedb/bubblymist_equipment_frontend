@@ -24,6 +24,8 @@ import EditRepairLog from "@/components/EditRepairLog";
 Object.keys(rules).forEach(rule => {
   extend(rule, rules[rule]);
 })
+
+// Create a VeeValidate validation rule allowing decimal numbers
 extend("decimal", {
   validate: (value, { decimals = '*', separator = '.' } = {}) => {
     if (value === null || value === undefined || value === '') {

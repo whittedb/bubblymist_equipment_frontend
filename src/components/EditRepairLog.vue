@@ -4,7 +4,7 @@
             <h2 class="mb-2">{{title}}</h2>
         </template>
         <validation-observer ref="observer" v-slot="{handleSubmit, invalid}">
-            <b-form @submit.prevent="handleSubmit(onSubmit)" @reset="onReset">
+            <b-form @submit.prevent="handleSubmit(onSubmit)" @reset.prevent="onReset">
                 <b-form-group
                         id="fieldset-1"
                         label-cols-sm="2"
@@ -17,8 +17,8 @@
                                   :date-format-options="{month: 'numeric', day: 'numeric', year: 'numeric'}"
                                   :reset-value="originalLog.date"/>
                 </b-form-group>
-                <validation-provider name="Description"
-                                     :rules="{required: true, min: 3}"
+                <validation-provider name="Description" immediate
+                                     :rules="{required: true, min: 3, max:128}"
                                      v-slot="validationContext">
                     <b-form-group
                             id="fieldset-2"
@@ -35,29 +35,11 @@
                         </b-form-invalid-feedback>
                     </b-form-group>
                 </validation-provider>
-                <validation-provider name="Part Number"
-                    :rules="{required: true, min:2, max:64}"
-                    v-slot="validationContext">
-                    <b-form-group
-                            id="fieldset-3"
-                            label-cols-sm="2"
-                            label-align-sm="left"
-                            description="Enter part number"
-                            label="Part Number:"
-                            label-for="partnum">
-                        <b-form-input id="partnum" v-model="updatedLog.part_number"
-                                      :state="getValidationState(validationContext)"
-                                      aria-describedBy="input-partnum-live-feedback"/>
-                        <b-form-invalid-feedback id="input-partnum-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                </validation-provider>
-                <validation-provider name="Part Name"
-                                     :rules="{min:4, max:64}"
+                <validation-provider name="Part Name" immediate
+                                     :rules="{required: true, min:4, max:64}"
                                      v-slot="validationContext">
                     <b-form-group
-                            id="fieldset-4"
+                            id="fieldset-3"
                             label-cols-sm="2"
                             label-align-sm="left"
                             description="Enter part name"
@@ -67,6 +49,24 @@
                                       :state="getValidationState(validationContext)"
                                       aria-describedBy="input-partname-live-feedback"/>
                         <b-form-invalid-feedback id="input-partname-live-feedback">
+                            {{validationContext.errors[0]}}
+                        </b-form-invalid-feedback>
+                    </b-form-group>
+                </validation-provider>
+                <validation-provider name="Part Number"
+                                     :rules="{min:2, max:64}"
+                                     v-slot="validationContext">
+                    <b-form-group
+                            id="fieldset-4"
+                            label-cols-sm="2"
+                            label-align-sm="left"
+                            description="Enter part number"
+                            label="Part Number:"
+                            label-for="partnum">
+                        <b-form-input id="partnum" v-model="updatedLog.part_number"
+                                      :state="getValidationState(validationContext)"
+                                      aria-describedBy="input-partnum-live-feedback"/>
+                        <b-form-invalid-feedback id="input-partnum-live-feedback">
                             {{validationContext.errors[0]}}
                         </b-form-invalid-feedback>
                     </b-form-group>
@@ -212,16 +212,14 @@
                         this.updateError(error)
                     })
             },
-            async onReset(evt) {
-                evt.preventDefault()
+            async onReset() {
                 this.loaded = false
                 await this.$nextTick()
                 this.dirty = false
                 this.updatedLog = Object.assign({}, this.originalLog)
                 this.loaded = true
             },
-            onCancel(evt) {
-                evt.preventDefault()
+            onCancel() {
                 this.$router.push({name: "Home"})
             },
             watchUpdated() {
