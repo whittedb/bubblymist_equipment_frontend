@@ -1,93 +1,110 @@
 <template>
-    <div class="machine_list">
-        <b-row class="mb-2" align-v="center">
-            <b-col cols="3">
-                <b-form-checkbox v-model="filter.active" inline
-                                 value="include_inactive"
-                                 unchecked-value="active_only"
-                                 :disabled="inactiveCount === 0">
-                    Show Inactive
-                </b-form-checkbox>
-            </b-col>
-        </b-row>
-        <b-table ref="machine_list_table" striped hover table-variant="success" head-variant="light"
-                 primary-key="id" :items="dataProvider" no-provider-filtering no-provider-paging no-provider-sorting
-                 :fields="fields" :busy.sync="isBusy"
-                 sticky-header="700px" no-border-collapse
-                 selectable select-mode="single" @row-selected="onRowSelected"
-                 sort-by="type"
-                 :filter="filter.active" :filter-function="customFilter" @filtered="onFiltered">
-            <template v-slot:table-busy>
-                <div class="text-center text-danger my-2">
-                    <b-spinner class="align-middle"></b-spinner>
-                    <strong>Loading...</strong>
-                </div>
-            </template>
-            <template v-slot:thead-top>
-                <b-tr>
-                    <b-td colspan="10" style="text-align: center">
-                        <b-link :to="{name: 'CreateMachine', params: {id: null, usedNumbers: usedNumbers}}">
-                            <b-icon-hammer/>
-                        </b-link>
-                        &nbsp;<b>Machines</b>
-                    </b-td>
-                </b-tr>
-            </template>
-            <template v-slot:cell(icon)="data">
-                <b-icon-wrench v-if="data.item['repair_logs'].length > 0" variant="danger"/>
-            </template>
-            <template v-slot:cell(type)="data">
-                <b-link :to="{name: 'EditMachine', params: {id: data.item.id, usedNumbers: usedNumbers}}">
-                    {{ machineFieldFormatter(data.item) }}
-                </b-link>
-            </template>
-            <template v-slot:cell(active)="data">
-                <b-checkbox :id="`active_${data.item.id}`" v-model="data.item.active"
-                            :checked="data.item.active" @input="handleActiveChange(data.item)"/>
-            </template>
-            <template v-slot:cell(create_repair_log)="data">
-                <b-link class="create_log"
-                        :to="{name: 'CreateRepairLog',
-                                params: {machine_id: data.item.id}}">
-                    <b-icon-hammer/>
-                </b-link>
-            </template>
-            <template v-slot:row-details="row">
-                <b-card class="repair_log_card">
-                    <b-table striped table-variant="primary" head-variant="light"
-                             primary-key="id" :items="row.item['repair_logs']" :fields="detailFields"
-                             no-border-collapse sort-by="date">
+    <b-row class="machine_list">
+        <b-col>
+            <b-row class="mb-2" align-v="center">
+                <b-col cols="3">
+                    <b-form-checkbox v-model="filter.active" inline
+                                     value="include_inactive"
+                                     unchecked-value="active_only"
+                                     :disabled="inactiveCount === 0">
+                        Show Inactive
+                    </b-form-checkbox>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col>
+                    <b-table ref="machine_list_table" striped hover table-variant="success" head-variant="light"
+                             primary-key="id" :items="dataProvider" show-empty
+                             no-provider-filtering no-provider-paging no-provider-sorting
+                             :fields="fields" :busy.sync="isBusy"
+                             sticky-header="650px" no-border-collapse
+                             selectable select-mode="single" @row-selected="onRowSelected"
+                             sort-by="type"
+                             :filter="filter.active" :filter-function="customFilter" @filtered="onFiltered">
+                        <template v-slot:table-busy>
+                            <div class="text-center text-danger my-2">
+                                <b-spinner class="align-middle"></b-spinner>
+                                <strong>Loading...</strong>
+                            </div>
+                        </template>
                         <template v-slot:thead-top>
                             <b-tr>
                                 <b-td colspan="10" style="text-align: center">
-                                    <b-link :to="{name: 'CreateRepairLog',
-                                        params: {machine_id: row.item.id}}">
+                                    <b-link :to="{name: 'CreateMachine', params: {id: null, usedNumbers: usedNumbers}}">
                                         <b-icon-hammer/>
                                     </b-link>
-                                    &nbsp;<b>Repair Logs</b>
+                                    &nbsp;<b>Machines</b>
                                 </b-td>
                             </b-tr>
                         </template>
-                        <template v-slot:cell(date)="data">
-                            <b-link :to="{name: 'EditRepairLog', params: {id: data.item.id}}">
-                                {{dateFieldFormatter(data.item.date)}}
+                        <template v-slot:cell(wrench)="data">
+                            <b-icon-wrench v-if="data.item['repair_logs'].length > 0" variant="danger"/>
+                        </template>
+                        <template v-slot:cell(type)="data">
+                            <b-link :to="{name: 'EditMachine', params: {id: data.item.id, usedNumbers: usedNumbers}}">
+                                {{ machineFieldFormatter(data.item) }}
                             </b-link>
                         </template>
-                        <template v-slot:cell(delete_repair_log)="data">
-                            <b-icon-trash-fill variant="danger" style="text-align: center"
-                                               @click="deleteRepairLog(data.item.id)"/>
+                        <template v-slot:cell(active)="data">
+                            <b-checkbox :id="`active_${data.item.id}`" v-model="data.item.active"
+                                        :checked="data.item.active" @change="handleActiveChange(data)"/>
+                        </template>
+                        <template v-slot:cell(create_repair_log)="data">
+                            <b-link class="create_log"
+                                    :to="{name: 'CreateRepairLog',
+                                params: {machine_id: data.item.id}}">
+                                <b-icon-hammer/>
+                            </b-link>
+                        </template>
+                        <template v-slot:row-details="row">
+                            <b-card class="repair_log_card">
+                                <b-table striped table-variant="primary" head-variant="light"
+                                         primary-key="id" :items="row.item['repair_logs']" :fields="detailFields"
+                                         no-border-collapse sort-by="date">
+                                    <template v-slot:thead-top>
+                                        <b-tr>
+                                            <b-td colspan="10" style="text-align: center">
+                                                <b-link :to="{name: 'CreateRepairLog',
+                                        params: {machine_id: row.item.id}}">
+                                                    <b-icon-hammer/>
+                                                </b-link>
+                                                &nbsp;<b>Repair Logs</b>
+                                            </b-td>
+                                        </b-tr>
+                                    </template>
+                                    <template v-slot:cell(date)="data">
+                                        <b-link :to="{name: 'EditRepairLog', params: {id: data.item.id}}">
+                                            {{dateFieldFormatter(data.item.date)}}
+                                        </b-link>
+                                    </template>
+                                    <template v-slot:cell(delete_repair_log)="data">
+                                        <b-icon-trash-fill variant="danger" style="text-align: center"
+                                                           @click="deleteRepairLog(data.item.id)"/>
+                                    </template>
+                                </b-table>
+                            </b-card>
                         </template>
                     </b-table>
-                </b-card>
-            </template>
-        </b-table>
-        <b-row class="mb-2">
-            <b-col cols="2">Total: {{totalRows}} of {{machineCnt}}</b-col>
-            <b-col cols="2">Washers: {{washerRows}}</b-col>
-            <b-col cols="2">Dryers: {{dryerRows}}</b-col>
-            <b-col>Inactive: {{inactiveCount}}</b-col>
-        </b-row>
-    </div>
+                </b-col>
+            </b-row>
+            <b-row class="mb-2">
+                <b-col cols="2">Total: {{totalRows}} of {{machineCnt}}</b-col>
+                <b-col cols="2">Washers: {{washerRows}}</b-col>
+                <b-col cols="2">Dryers: {{dryerRows}}</b-col>
+                <b-col>Inactive: {{inactiveCount}}</b-col>
+            </b-row>
+            <b-row v-if="error" class="error-row">
+                <b-col>
+                    <span v-if="error.detail" class="align-middle">
+                        <h3>{{error.status}}: {{error.statusText}} - {{error.detail}}</h3>
+                    </span>
+                    <span class="align-middle">
+                        <h3>{{error.message}}</h3>
+                    </span>
+                </b-col>
+            </b-row>
+        </b-col>
+    </b-row>
 </template>
 
 <script>
@@ -123,7 +140,7 @@
                 },
                 filterOn: ["active"],
                 fields: [
-                    {key: "icon", label: ""},
+                    {key: "wrench", label: ""},
                     {key: "type", label: "Machine",
                         sortable: true,
                         sortByFormatted: (value, key, item) => {
@@ -175,7 +192,7 @@
                 ],
                 machineList: [],
                 repairInfo: {},
-                error: {},
+                error: null,
             }
         },
         methods: {
@@ -210,12 +227,14 @@
                     laborCost: laborCost,
                 }
             },
-            handleActiveChange(item) {
+            handleActiveChange(data) {
+                this.error = null
+                let old_value = data.item.active
+                let new_value = !old_value
                 const options = {
-                    url: `/equipment_${item.active ? "enable" : "disable"}/${item.id}`,
+                    url: `/equipment_${new_value ? "enable" : "disable"}/${data.item.id}`,
                     method: "put"
                 }
-                this.error = null
                 this.$http.request(options)
                     // eslint-disable-next-line no-unused-vars
                     .then(response => {
@@ -224,7 +243,12 @@
                         }
                     })
                     // eslint-disable-next-line no-unused-vars
-                    .catch((error) => {
+                    .catch(error => {
+                        data.item.active = old_value
+                        if (error.response.status === 409) {
+                            error.message = error.response.data.detail
+                            error.response = null
+                        }
                         this.updateError(error)
                     })
             },

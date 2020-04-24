@@ -3,134 +3,138 @@
         <template v-slot:header>
             <h2 class="mb-2">{{title}}</h2>
         </template>
-        <validation-observer ref="observer" v-slot="{valid}">
-            <b-form @submit.prevent="onSubmit" @reset.prevent="onReset">
-                <validation-provider v-if="isCreate" name="Machine Type" immediate
-                                     :rules="{required: true, oneOf: [0,1]}"
-                                     v-slot="validationContext">
+        <b-card-body>
+            <validation-observer ref="observer" v-slot="{valid}">
+                <b-form @submit.prevent="onSubmit" @reset.prevent="onReset">
+                    <validation-provider v-if="isCreate" name="Machine Type" immediate
+                                         :rules="{required: true, oneOf: [0,1]}"
+                                         v-slot="validationContext">
+                        <b-form-group
+                                id="fieldset-0"
+                                label-cols-sm="2"
+                                label-align-sm="left"
+                                description="Select a machine type"
+                                label="Machine Type:"
+                                label-for="type">
+                            <b-form-select id="type" required v-model="updatedMachine.type"
+                                           :options="typeOptions" :value="null"
+                                           :state="getValidationState(validationContext)"
+                                           @input="validateNumber"
+                                           aria-describedby="input-machine-type-live-feedback"/>
+                            <b-form-invalid-feedback id="input-machine-type-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <validation-provider name="Description" immediate
+                                         rules="max:32"
+                                         v-slot="validationContext">
+                        <b-form-group id="fieldset-1"
+                                      label-cols-sm="2"
+                                      description="Enter a description"
+                                      label="Description"
+                                      label-for="description">
+                            <b-form-input id="description" v-model="updatedMachine.description"
+                                          :state="getValidationState(validationContext)"
+                                          :disabled="isCreate && updatedMachine.type == null"
+                                          aria-describedby="input-description-live-feedback"/>
+                            <b-form-invalid-feedback id="input-description-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <validation-provider ref="number_provider" vid="number" name="Machine Number" immediate
+                                         :rules="{required: true, numeric: true, min_value: 1}"
+                                         v-slot="validationContext">
+                        <b-form-group id="fieldset-2"
+                                      label-cols-sm="2"
+                                      label-align-sm="left"
+                                      description="Enter the machine number"
+                                      label="Machine Number:"
+                                      label-for="number">
+                            <b-form-input id="number" v-model="updatedMachine.number"
+                                          :disabled="isCreate && updatedMachine.type == null"
+                                          :state="getValidationState(validationContext)"
+                                          @input="validateNumber"
+                                          @focusout="validateNumber"
+                                          aria-describedby="input-number-live-feedback"/>
+                            <b-form-invalid-feedback id="input-number-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <validation-provider name="Model Number" immediate
+                                         :rules="{required: true, min: 3, max: 32}"
+                                         v-slot="validationContext">
+                        <b-form-group
+                                id="fieldset-3"
+                                label-cols-sm="2"
+                                label-align-sm="left"
+                                description="Enter the machines model number"
+                                label="Model Number:"
+                                label-for="model">
+                            <b-form-input id="model" v-model="updatedMachine.model"
+                                          :disabled="isCreate && updatedMachine.type == null"
+                                          :state="getValidationState(validationContext)"
+                                          aria-describedby="input-model-live-feedback"/>
+                            <b-form-invalid-feedback id="input-model-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <validation-provider name="Serial Number" immediate
+                                         rules="max: 64"
+                                         v-slot="validationContext">
+                        <b-form-group
+                                id="fieldset-4"
+                                label-cols-sm="2"
+                                label-align-sm="left"
+                                description="Enter the machines serial number"
+                                label="Serial Number:"
+                                label-for="serial">
+                            <b-form-input id="serial" v-model="updatedMachine.serial"
+                                          :disabled="isCreate && updatedMachine.type == null"
+                                          :state="getValidationState(validationContext)"
+                                          aria-describedby="input-serial-live-feedback"/>
+                            <b-form-invalid-feedback id="input-serial-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
                     <b-form-group
-                            id="fieldset-0"
+                            id="fieldset-5"
                             label-cols-sm="2"
                             label-align-sm="left"
-                            description="Select a machine type"
-                            label="Machine Type:"
-                            label-for="type">
-                        <b-form-select id="type" required v-model="updatedMachine.type"
-                                       :options="typeOptions" :value="null"
-                                       :state="getValidationState(validationContext)"
-                                       @input="validateNumber"
-                                       aria-describedby="input-machine-type-live-feedback"/>
-                        <b-form-invalid-feedback id="input-machine-type-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
+                            description="Enabled or Disabled"
+                            label="Active:"
+                            label-for="active">
+                        <b-form-checkbox id="active" v-model="updatedMachine.active" switch
+                                         :disabled="isCreate && updatedMachine.type == null"/>
                     </b-form-group>
-                </validation-provider>
-                <validation-provider name="Description" immediate
-                                     rules="max:32"
-                                     v-slot="validationContext">
-                    <b-form-group id="fieldset-1"
-                                  label-cols-sm="2"
-                                  description="Enter a description"
-                                  label="Description"
-                                  label-for="description">
-                        <b-form-input id="description" v-model="updatedMachine.description"
-                                      :state="getValidationState(validationContext)"
-                                      :disabled="isCreate && updatedMachine.type == null"
-                                      aria-describedby="input-description-live-feedback"/>
-                        <b-form-invalid-feedback id="input-description-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
+                    <b-form-group id="fieldset-buttons">
+                        <b-button-group>
+                            <b-button pill class="mx-2" variant="primary" type="cancel" @click="onCancel">Cancel</b-button>
+                            <b-button v-if="!isCreate && formChanged && valid"
+                                      pill class="mx-2" variant="danger" type="submit">Update</b-button>
+                            <b-button v-if="isCreate && formChanged && valid"
+                                      pill class="mx-2" variant="danger" type="submit">Create</b-button>
+                            <b-button v-if="formChanged" pill class="mx-2" variant="warning" type="reset">Reset</b-button>
+                        </b-button-group>
                     </b-form-group>
-                </validation-provider>
-                <validation-provider ref="number_provider" vid="number" name="Machine Number" immediate
-                                     :rules="{required: true, numeric: true, min_value: 1}"
-                                     v-slot="validationContext">
-                    <b-form-group id="fieldset-2"
-                                  label-cols-sm="2"
-                                  label-align-sm="left"
-                                  description="Enter the machine number"
-                                  label="Machine Number:"
-                                  label-for="number">
-                        <b-form-input id="number" v-model="updatedMachine.number"
-                                      :disabled="isCreate && updatedMachine.type == null"
-                                      :state="getValidationState(validationContext)"
-                                      @input="validateNumber"
-                                      @focusout="validateNumber"
-                                      aria-describedby="input-number-live-feedback"/>
-                        <b-form-invalid-feedback id="input-number-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                </validation-provider>
-                <validation-provider name="Model Number" immediate
-                                     :rules="{required: true, min: 3, max: 32}"
-                                     v-slot="validationContext">
-                    <b-form-group
-                            id="fieldset-3"
-                            label-cols-sm="2"
-                            label-align-sm="left"
-                            description="Enter the machines model number"
-                            label="Model Number:"
-                            label-for="model">
-                        <b-form-input id="model" v-model="updatedMachine.model"
-                                      :disabled="isCreate && updatedMachine.type == null"
-                                      :state="getValidationState(validationContext)"
-                                      aria-describedby="input-model-live-feedback"/>
-                        <b-form-invalid-feedback id="input-model-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                </validation-provider>
-                <validation-provider name="Serial Number" immediate
-                                     rules="max: 64"
-                                     v-slot="validationContext">
-                    <b-form-group
-                            id="fieldset-4"
-                            label-cols-sm="2"
-                            label-align-sm="left"
-                            description="Enter the machines serial number"
-                            label="Serial Number:"
-                            label-for="serial">
-                        <b-form-input id="serial" v-model="updatedMachine.serial"
-                                      :disabled="isCreate && updatedMachine.type == null"
-                                      :state="getValidationState(validationContext)"
-                                      aria-describedby="input-serial-live-feedback"/>
-                        <b-form-invalid-feedback id="input-serial-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                </validation-provider>
-                <b-form-group
-                        id="fieldset-5"
-                        label-cols-sm="2"
-                        label-align-sm="left"
-                        description="Enabled or Disabled"
-                        label="Active:"
-                        label-for="active">
-                    <b-form-checkbox id="active" v-model="updatedMachine.active" switch
-                                     :disabled="isCreate && updatedMachine.type == null"/>
-                </b-form-group>
-                <b-form-group id="fieldset-buttons">
-                    <b-button-group>
-                        <b-button pill class="mx-2" variant="primary" type="cancel" @click="onCancel">Cancel</b-button>
-                        <b-button v-if="!isCreate && formChanged && valid"
-                                  pill class="mx-2" variant="danger" type="submit">Update</b-button>
-                        <b-button v-if="isCreate && formChanged && valid"
-                                  pill class="mx-2" variant="danger" type="submit">Create</b-button>
-                        <b-button v-if="formChanged" pill class="mx-2" variant="warning" type="reset">Reset</b-button>
-                    </b-button-group>
-                </b-form-group>
-            </b-form>
-        </validation-observer>
+                </b-form>
+            </validation-observer>
+        </b-card-body>
         <template v-slot:footer>
-            <div v-if="error">
-                <div v-if="error.detail">
-                    <h4>{{error.status}}: {{error.statusText}} - {{error.detail}}</h4>
-                </div>
-                <div v-else>
-                    <h4>{{error.message}}</h4>
-                </div>
-            </div>
+            <b-row v-if="error" class="error-row">
+                <b-col>
+                    <span v-if="error.detail" class="align-middle">
+                        <h3>{{error.status}}: {{error.statusText}} - {{error.detail}}</h3>
+                    </span>
+                    <span class="align-middle">
+                        <h3>{{error.message}}</h3>
+                    </span>
+                </b-col>
+            </b-row>
         </template>
     </b-card>
 </template>
@@ -142,11 +146,9 @@
             this.updatedMachine = {}
             this.error = null
             this.formChanged = false
-//            this.loaded = false
             if (this.isCreate) {
                 this.updatedMachine = Object.assign({}, this.originalMachine)
                 this.watchUpdated()
-//                this.loaded = true
             } else {
                 this.$http.get(`/equipment/${this.$route.params.id}`)
                     .then((response) => {
@@ -157,7 +159,6 @@
                     .catch((error) => {
                         this.updateError(error)
                     })
-//                    .finally(() => this.loaded = true)
             }
         },
         computed: {
@@ -184,7 +185,6 @@
         },
         data() {
             return {
-//                loaded: false,
                 formChanged: false,
                 unwatchUpdatedMachine: null,
                 updatedMachine: {},
@@ -206,12 +206,9 @@
             }
         },
         methods: {
-           getValidationState({/* dirty, validated,*/ errors, valid = null}) {
+           getValidationState({errors, valid = null}) {
                return errors[0] ? false : (valid ? true : null)
            },
-           //  getValidationState({dirty, validated, valid = null}) {
-           //      return dirty || validated ? valid : null
-           //  },
             validateNumber(value) {
                let observer = this.$refs.observer
                 let provider = this.$refs.number_provider
@@ -260,18 +257,20 @@
                         this.$router.push({name: "Home"})
                     })
                     .catch((error) => {
+                        if (error.response.status === 409) {
+                            error.message = error.response.data.detail
+                            error.response = null
+                        }
                         this.updateError(error)
                     })
             },
             async onReset() {
-//                this.loaded = false
-//                await this.$nextTick()
                 this.updatedMachine = Object.assign({}, this.originalMachine)
                 requestAnimationFrame(() => {
                     this.$refs.observer.reset()
                     this.formChanged = false
+                    this.error = null
                 })
-//                this.loaded = true
             },
             onCancel() {
                 this.$router.push({name: "Home"})
@@ -314,5 +313,4 @@
 </script>
 
 <style scoped>
-
 </style>

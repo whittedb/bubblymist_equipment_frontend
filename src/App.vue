@@ -1,5 +1,5 @@
 <template>
-  <b-container id="app">
+  <b-container id="app" fluid="xl">
     <TheTitleBar :title="title"/>
     <router-view></router-view>
   </b-container>
@@ -41,7 +41,7 @@ export default {
 /* General style overrides and custom classes
  */
 body {
-  margin: 0;
+  margin: 10px;
 }
 
 .my-widget {
@@ -53,7 +53,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 //  text-align: center;
-  color: #2c3e50;
+  color: #2c495f;
   margin-outside: 30px;
+}
+.error-row {
+  background: var(--danger);
 }
 </style>

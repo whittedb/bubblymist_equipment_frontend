@@ -1,5 +1,5 @@
 <template>
-    <b-row class="mb-5 mt-4">
+    <b-row class="mb-3 mt-4">
         <b-col class="logo_image" cols="1">
             <b-link to="/">
                 <b-img src="../assets/logo_800x617.png" :alt="version" height="70"></b-img>

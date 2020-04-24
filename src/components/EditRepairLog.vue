@@ -3,133 +3,137 @@
         <template v-slot:header>
             <h2 class="mb-2">{{title}}</h2>
         </template>
-        <validation-observer ref="observer" v-slot="{handleSubmit, invalid}">
-            <b-form @submit.prevent="handleSubmit(onSubmit)" @reset.prevent="onReset">
-                <b-form-group
-                        id="fieldset-1"
-                        label-cols-sm="2"
-                        label-align-sm="left"
-                        description="Enter the log date"
-                        label="Date:"
-                        label-for="date">
-                    <b-datepicker id="date" v-model="updatedLog.date"
-                                  today-button reset-button close-button dark required
-                                  :date-format-options="{month: 'numeric', day: 'numeric', year: 'numeric'}"
-                                  :reset-value="originalLog.date"/>
-                </b-form-group>
-                <validation-provider name="Description" immediate
-                                     :rules="{required: true, min: 3, max:128}"
-                                     v-slot="validationContext">
+        <b-card-body>
+            <validation-observer ref="observer" v-slot="{handleSubmit, invalid}">
+                <b-form @submit.prevent="handleSubmit(onSubmit)" @reset.prevent="onReset">
                     <b-form-group
-                            id="fieldset-2"
+                            id="fieldset-1"
                             label-cols-sm="2"
                             label-align-sm="left"
-                            description="Enter a description"
-                            label="Description:"
-                            label-for="description">
-                        <b-form-input id="description" v-model="updatedLog.description" required
-                                      :state="getValidationState(validationContext)"
-                                      aria-describedby="input-description-live-feedback"/>
-                        <b-form-invalid-feedback id="input-description-live-feedback">
-                            {{ validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
+                            description="Enter the log date"
+                            label="Date:"
+                            label-for="date">
+                        <b-datepicker id="date" v-model="updatedLog.date"
+                                      today-button reset-button close-button dark required
+                                      :date-format-options="{month: 'numeric', day: 'numeric', year: 'numeric'}"
+                                      :reset-value="originalLog.date"/>
                     </b-form-group>
-                </validation-provider>
-                <validation-provider name="Part Name" immediate
-                                     :rules="{required: true, min:4, max:64}"
-                                     v-slot="validationContext">
-                    <b-form-group
-                            id="fieldset-3"
-                            label-cols-sm="2"
-                            label-align-sm="left"
-                            description="Enter part name"
-                            label="Part Name:"
-                            label-for="partname">
-                        <b-form-input id="partname" v-model="updatedLog.part_name"
-                                      :state="getValidationState(validationContext)"
-                                      aria-describedBy="input-partname-live-feedback"/>
-                        <b-form-invalid-feedback id="input-partname-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
+                    <validation-provider name="Description" immediate
+                                         :rules="{required: true, min: 3, max:128}"
+                                         v-slot="validationContext">
+                        <b-form-group
+                                id="fieldset-2"
+                                label-cols-sm="2"
+                                label-align-sm="left"
+                                description="Enter a description"
+                                label="Description:"
+                                label-for="description">
+                            <b-form-input id="description" v-model="updatedLog.description" required
+                                          :state="getValidationState(validationContext)"
+                                          aria-describedby="input-description-live-feedback"/>
+                            <b-form-invalid-feedback id="input-description-live-feedback">
+                                {{ validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <validation-provider name="Part Name" immediate
+                                         :rules="{required: true, min:4, max:64}"
+                                         v-slot="validationContext">
+                        <b-form-group
+                                id="fieldset-3"
+                                label-cols-sm="2"
+                                label-align-sm="left"
+                                description="Enter part name"
+                                label="Part Name:"
+                                label-for="partname">
+                            <b-form-input id="partname" v-model="updatedLog.part_name"
+                                          :state="getValidationState(validationContext)"
+                                          aria-describedBy="input-partname-live-feedback"/>
+                            <b-form-invalid-feedback id="input-partname-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <validation-provider name="Part Number"
+                                         :rules="{min:2, max:64}"
+                                         v-slot="validationContext">
+                        <b-form-group
+                                id="fieldset-4"
+                                label-cols-sm="2"
+                                label-align-sm="left"
+                                description="Enter part number"
+                                label="Part Number:"
+                                label-for="partnum">
+                            <b-form-input id="partnum" v-model="updatedLog.part_number"
+                                          :state="getValidationState(validationContext)"
+                                          aria-describedBy="input-partnum-live-feedback"/>
+                            <b-form-invalid-feedback id="input-partnum-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <validation-provider name="Part Cost"
+                                         :rules="{min_value: 0, decimal: true}"
+                                         v-slot="validationContext">
+                        <b-form-group
+                                id="fieldset-5"
+                                label-cols-sm="2"
+                                label-align-sm="left"
+                                description="Enter part cost"
+                                label="Part Cost:"
+                                label-for="partcost">
+                            <b-form-input id="partcost" v-model="updatedLog.part_cost"
+                                          type="number" step="any"
+                                          :state="getValidationState(validationContext)"
+                                          aria-describedBy="input-partcost-live-feedback"/>
+                            <b-form-invalid-feedback id="input-partcost-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <validation-provider name="Labor Cost"
+                                         :rules="{min_value:0, decimal: true}"
+                                         v-slot="validationContext">
+                        <b-form-group
+                                id="fieldset-6"
+                                label-cols-sm="2"
+                                label-align-sm="left"
+                                description="Enter labor cost"
+                                label="Labor Cost:"
+                                label-for="laborcost">
+                            <b-form-input id="laborcost" v-model="updatedLog.labor_cost"
+                                          type="number" step="any"
+                                          :state="getValidationState(validationContext)"
+                                          aria-describedBy="input-laborcost-live-feedback"/>
+                            <b-form-invalid-feedback id="input-laborcost-live-feedback">
+                                {{validationContext.errors[0]}}
+                            </b-form-invalid-feedback>
+                        </b-form-group>
+                    </validation-provider>
+                    <b-form-group id="fieldset-7">
+                        <b-button-group>
+                            <b-button pill class="mx-2" variant="danger" type="cancel" @click="onCancel">Cancel</b-button>
+                            <b-button v-if="isCreate && !invalid"
+                                      pill class="mx-2" variant="success" type="submit">Create</b-button>
+                            <b-button v-if="!isCreate && !invalid && dirty"
+                                      pill class="mx-2" variant="success" type="submit">Update</b-button>
+                            <b-button v-if="dirty" pill class="mx-2" variant="warning" type="reset">Reset</b-button>
+                        </b-button-group>
                     </b-form-group>
-                </validation-provider>
-                <validation-provider name="Part Number"
-                                     :rules="{min:2, max:64}"
-                                     v-slot="validationContext">
-                    <b-form-group
-                            id="fieldset-4"
-                            label-cols-sm="2"
-                            label-align-sm="left"
-                            description="Enter part number"
-                            label="Part Number:"
-                            label-for="partnum">
-                        <b-form-input id="partnum" v-model="updatedLog.part_number"
-                                      :state="getValidationState(validationContext)"
-                                      aria-describedBy="input-partnum-live-feedback"/>
-                        <b-form-invalid-feedback id="input-partnum-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                </validation-provider>
-                <validation-provider name="Part Cost"
-                                     :rules="{min_value: 0, decimal: true}"
-                                     v-slot="validationContext">
-                    <b-form-group
-                            id="fieldset-5"
-                            label-cols-sm="2"
-                            label-align-sm="left"
-                            description="Enter part cost"
-                            label="Part Cost:"
-                            label-for="partcost">
-                        <b-form-input id="partcost" v-model="updatedLog.part_cost"
-                                      type="number" step="any"
-                                      :state="getValidationState(validationContext)"
-                                      aria-describedBy="input-partcost-live-feedback"/>
-                        <b-form-invalid-feedback id="input-partcost-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                </validation-provider>
-                <validation-provider name="Labor Cost"
-                                     :rules="{min_value:0, decimal: true}"
-                                     v-slot="validationContext">
-                    <b-form-group
-                            id="fieldset-6"
-                            label-cols-sm="2"
-                            label-align-sm="left"
-                            description="Enter labor cost"
-                            label="Labor Cost:"
-                            label-for="laborcost">
-                        <b-form-input id="laborcost" v-model="updatedLog.labor_cost"
-                                      type="number" step="any"
-                                      :state="getValidationState(validationContext)"
-                                      aria-describedBy="input-laborcost-live-feedback"/>
-                        <b-form-invalid-feedback id="input-laborcost-live-feedback">
-                            {{validationContext.errors[0]}}
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                </validation-provider>
-                <b-form-group id="fieldset-7">
-                    <b-button-group>
-                        <b-button pill class="mx-2" variant="danger" type="cancel" @click="onCancel">Cancel</b-button>
-                        <b-button v-if="isCreate && !invalid"
-                                  pill class="mx-2" variant="success" type="submit">Create</b-button>
-                        <b-button v-if="!isCreate && !invalid && dirty"
-                                  pill class="mx-2" variant="success" type="submit">Update</b-button>
-                        <b-button v-if="dirty" pill class="mx-2" variant="warning" type="reset">Reset</b-button>
-                    </b-button-group>
-                </b-form-group>
-            </b-form>
-        </validation-observer>
+                </b-form>
+            </validation-observer>
+        </b-card-body>
         <template v-slot:footer>
-            <div v-if="error">
-                <div v-if="error.detail">
-                    <h4>{{error.status}}: {{error.statusText}} - {{error.detail}}</h4>
-                </div>
-                <div v-else>
-                    <h4>{{error.message}}</h4>
-                </div>
-            </div>
+            <b-row v-if="error" class="error-row">
+                <b-col>
+                    <span v-if="error.detail" class="align-middle">
+                        <h3>{{error.status}}: {{error.statusText}} - {{error.detail}}</h3>
+                    </span>
+                    <span class="align-middle">
+                        <h3>{{error.message}}</h3>
+                    </span>
+                </b-col>
+            </b-row>
         </template>
     </b-card>
 </template>
@@ -218,6 +222,7 @@
                 this.dirty = false
                 this.updatedLog = Object.assign({}, this.originalLog)
                 this.loaded = true
+                this.error = null
             },
             onCancel() {
                 this.$router.push({name: "Home"})
