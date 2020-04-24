@@ -13,7 +13,7 @@
         <b-table ref="machine_list_table" striped hover table-variant="success" head-variant="light"
                  primary-key="id" :items="dataProvider" no-provider-filtering no-provider-paging no-provider-sorting
                  :fields="fields" :busy.sync="isBusy"
-                 sticky-header="600px" no-border-collapse
+                 sticky-header="700px" no-border-collapse
                  selectable select-mode="single" @row-selected="onRowSelected"
                  sort-by="type"
                  :filter="filter.active" :filter-function="customFilter" @filtered="onFiltered">
@@ -46,7 +46,9 @@
                             :checked="data.item.active" @input="handleActiveChange(data.item)"/>
             </template>
             <template v-slot:cell(create_repair_log)="data">
-                <b-link class="create_log" :to="{name: 'CreateRepairLog', params: {id: null, machine_id: data.item.id}}">
+                <b-link class="create_log"
+                        :to="{name: 'CreateRepairLog',
+                                params: {machine_id: data.item.id}}">
                     <b-icon-hammer/>
                 </b-link>
             </template>
@@ -56,21 +58,13 @@
                              primary-key="id" :items="row.item['repair_logs']" :fields="detailFields"
                              no-border-collapse sort-by="date">
                         <template v-slot:thead-top>
-                            <b-tr class="mb-2" align-v="center" >
-                                <b-td colspan="12">
-                                    <b-container>
-                                        <b-row>
-                                            <b-col cols="3">
-                                                <b-button pill class="p-1 mb-0" variant="primary"
-                                                          :to="{name: 'CreateRepairLog', params: {id: null}}">
-                                                    Create Log
-                                                </b-button>
-                                            </b-col>
-                                            <b-col cols="6">
-                                                <b>Repair Logs</b>
-                                            </b-col>
-                                        </b-row>
-                                    </b-container>
+                            <b-tr>
+                                <b-td colspan="10" style="text-align: center">
+                                    <b-link :to="{name: 'CreateRepairLog',
+                                        params: {machine_id: row.item.id}}">
+                                        <b-icon-hammer/>
+                                    </b-link>
+                                    &nbsp;<b>Repair Logs</b>
                                 </b-td>
                             </b-tr>
                         </template>
@@ -80,10 +74,8 @@
                             </b-link>
                         </template>
                         <template v-slot:cell(delete_repair_log)="data">
-                            <b-button pill class="p-1 mb-0" variant="primary"
-                                      @click="deleteRepairLog(data.item.id)">
-                                <span>Delete</span>
-                            </b-button>
+                            <b-icon-trash-fill variant="danger" style="text-align: center"
+                                               @click="deleteRepairLog(data.item.id)"/>
                         </template>
                     </b-table>
                 </b-card>
@@ -140,8 +132,9 @@
                     },
                     {key: "description", sortable: true, thStyle: {"text-align": "center"}},
                     {key: "model", sortable: true, thStyle: {"text-align": "center"}},
-                    "serial",
-                    {key: "numrepairs", label: "Repairs", sortable: true, thStyle: {"text-align": "center"},
+                    {key: "serial", thStyle: {"text-align": "center"}},
+                    {key: "numrepairs", label: "Repairs", sortable: true,
+                        thStyle: {"text-align": "center"}, tdClass: "bmapp-repairs",
                         formatter: (value, key, item) => {
                             return this.repairInfo[item.id]["numRepairs"]
                         },
@@ -172,13 +165,13 @@
                     {key: "create_repair_log", label: ""}
                 ],
                 detailFields: [
-                    {key: "date", sortable: true},
-                    "description",
-                    {key: "part_number", sortable: true},
-                    {key: "part_name", sortable: true},
-                    {key: "part_cost", sortable: true},
-                    {key: "labor_cost", sortable: true},
-                    {key: "delete_repair_log", label: "Delete Log"}
+                    {key: "date", sortable: true, thStyle: {"text-align": "center"}},
+                    {key: "description", label: "Description", thStyle: {"text-align": "center"}},
+                    {key: "part_number", sortable: true, thStyle: {"text-align": "center"}},
+                    {key: "part_name", sortable: true, thStyle: {"text-align": "center"}},
+                    {key: "part_cost", sortable: true, thStyle: {"text-align": "center"}, tdClass: "bmapp-money"},
+                    {key: "labor_cost", sortable: true, thStyle: {"text-align": "center"}, tdClass: "bmapp-money"},
+                    {key: "delete_repair_log", label: ""}
                 ],
                 machineList: [],
                 repairInfo: {},
@@ -192,12 +185,16 @@
                         response.data.forEach(this.addMachine)
                         callback(this.machineList)
                     }).catch(error => {
-                    this.updateError(error)
-                    callback([])
-                });
+                        this.updateError(error)
+                        callback([])
+                    });
             },
             addMachine(machine) {
                 machine["_showDetails"] = false
+                this.calculateRepairLogInfo(machine)
+                this.machineList.push(machine)
+            },
+            calculateRepairLogInfo(machine) {
                 let partsCost = 0
                 let laborCost = 0
                 let repairLogs = machine["repair_logs"]
@@ -212,7 +209,6 @@
                     partsCost: partsCost,
                     laborCost: laborCost,
                 }
-                this.machineList.push(machine)
             },
             handleActiveChange(item) {
                 const options = {
@@ -238,14 +234,20 @@
                     method: "delete",
                 }
                 this.error = null
+                this.isBusy = true
                 this.$http.request(options)
                     // eslint-disable-next-line no-unused-vars
                     .then((response) => {
                         for (let machine_i = 0; machine_i < this.machineList.length; ++machine_i) {
-                            let logs = this.machineList[machine_i]["repair_logs"]
+                            let machine = this.machineList[machine_i]
+                            let logs = machine["repair_logs"]
                             for (let log_i = 0; log_i < logs.length; ++log_i) {
                                 if (logs[log_i].id === repair_log_id) {
                                     logs.splice(log_i, 1)
+                                    this.calculateRepairLogInfo(machine)
+                                    if (logs.length === 0) {
+                                        machine["_showDetails"] = false
+                                    }
                                     break
                                 }
                             }
@@ -254,6 +256,7 @@
                     .catch((error) => {
                         this.updateError(error)
                     })
+                    .finally(() => {this.isBusy = false})
             },
             machineFieldFormatter(item) {
                 return (item.type === 0 ? "Washer " : "Dryer ") + item.number.toString()
@@ -261,9 +264,10 @@
             dateFieldFormatter(date) {
                 return `${date.substring(5, 7)}/${date.substring(8)}/${date.substring(0, 4)}`
             },
+            // eslint-disable-next-line no-unused-vars
             onRowSelected(items) {
-                this.machineList.forEach(item => this.$set(item, '_showDetails', false))
-                if (items[0]["repair_logs"].length > 0) {
+                this.machineList.forEach(machine => this.$set(machine, '_showDetails', false))
+                if (items[0] && items[0]["repair_logs"].length > 0) {
                     this.$set(items[0], '_showDetails', !items[0]._showDetails)
                 }
             },
@@ -303,6 +307,9 @@
         text-align: right;
     }
     .bmapp-checkbox {
+        text-align: center;
+    }
+    .bmapp-repairs {
         text-align: center;
     }
 </style>

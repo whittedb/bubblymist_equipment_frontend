@@ -143,7 +143,7 @@
             this.loaded = false
             if (this.isCreate) {
                 let now = new Date()
-                this.originalLog.date = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`
+                this.originalLog.date = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`
                 this.updatedLog = Object.assign({}, this.originalLog)
                 this.watchUpdated()
                 this.loaded = true

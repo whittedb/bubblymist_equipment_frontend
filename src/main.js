@@ -111,7 +111,7 @@ const routes = [
     props: true
   },
   {
-    path: "/editrepairlog",
+    path: "/createrepairlog",
     name: "CreateRepairLog",
     component: EditRepairLog,
     props: true
