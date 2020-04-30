@@ -47,7 +47,7 @@ export default {
         return  {
             authenticated: this.authenticated,
             type: this.isGoogleAuth() ? "Google" : this.isFacebookAuth() ? "Facebook" : "None",
-            token: this.isGoogleAuth() ? this.googleAuthToken() : this.isFacebookAuth() ? this.facebookAuthToken : null
+            token: this.isGoogleAuth() ? this.googleAuthToken : this.isFacebookAuth() ? this.facebookAuthToken : null
         }
     },
 }
