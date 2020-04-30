@@ -6,7 +6,8 @@
 </template>
 
 <script>
-import TheTitleBar from './components/TheTitleBar.vue'
+import TheTitleBar from "./TheTitleBar.vue"
+import auth from "../auth"
 
 export default {
   name: 'App',
@@ -18,11 +19,14 @@ export default {
       return "Equipment Manager - " + this.env
     }
   },
-  data: function () {
+  data() {
     return {
       version: process.env.VUE_APP_VERSION,
       env: process.env.NODE_ENV
     }
+  },
+  mounted() {
+    auth.checkAuth()
   }
 }
 </script>
@@ -31,7 +35,7 @@ export default {
 /* Import custom SASS variable overrides, or alternatively
  define your variable overrides here instead
  */
-@import 'assets/custom-vars.scss';
+@import '../assets/custom-vars.scss';
 
 /* Import Bootstrap and BootstrapVue source SCSS files
  */
@@ -59,4 +63,28 @@ body {
 .error-row {
   background: var(--danger);
 }
+
+.google-sign-in-button {
+  color: white;
+  background-color: red;
+  height: 50px;
+  font-size: 16px;
+  border-radius: 10px;
+  padding: 10px 20px 25px 20px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.facebook-sign-in-button {
+  color: white;
+  background-color: #3b5998;
+  height: 50px;
+  font-size: 16px;
+  border-radius: 10px;
+  padding: 10px 20px 25px 20px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+/*.title {*/
+/*  font-family: Garamond, sans-serif;*/
+/*  padding: 5px;*/
+/*  alignment: center;*/
+/*}*/
 </style>

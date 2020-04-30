@@ -140,6 +140,8 @@
 </template>
 
 <script>
+    import {mapGetters} from "vuex"
+
     export default {
         name: "EditMachine",
         mounted() {
@@ -162,6 +164,9 @@
             }
         },
         computed: {
+            ...mapGetters([
+                "usedNumbers"
+            ]),
             isCreate() {
                 return !this.$route.params.id
             },
@@ -219,8 +224,8 @@
                     .then(validationContext => {
                         if (validationContext.valid) {
                             let existingNumbers = this.isCreate ?
-                                this.$route.params.usedNumbers[this.updatedMachine.type] :
-                                this.$route.params.usedNumbers[this.originalMachine.type]
+                                this.usedNumbers[this.updatedMachine.type] :
+                                this.usedNumbers[this.originalMachine.type]
 
                             for (let i=0; i < existingNumbers.length; ++i) {
                                 if (this.isCreate && new_number === existingNumbers[i]) {
@@ -273,7 +278,7 @@
                 })
             },
             onCancel() {
-                this.$router.push({name: "Home"})
+                this.$router.push({name: "MachineList"})
             },
             watchUpdated() {
                 this.unwatchUpdated()

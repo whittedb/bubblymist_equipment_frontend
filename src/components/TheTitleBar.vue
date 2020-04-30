@@ -1,17 +1,25 @@
 <template>
     <b-row class="mb-3 mt-4">
-        <b-col class="logo_image" cols="1">
+        <b-col class="logo_image" cols="2">
             <b-link to="/">
                 <b-img src="../assets/logo_800x617.png" :alt="version" height="70"></b-img>
             </b-link>
         </b-col>
-        <b-col class="title" cols="11" style="text-align: center">
+        <b-col class="title" cols="9" style="text-align: center">
             <h1>{{ title }}</h1>
+        </b-col>
+        <b-col cols="1" v-if="isAuthenticated" >
+            <span style="text-align: right">
+            <b-link @click="logout">Logout</b-link>
+            </span>
         </b-col>
     </b-row>
 </template>
 
 <script>
+    import auth from "@/auth"
+    import {mapGetters} from "vuex"
+
     export default {
         name: "TitleBar",
         props: {
@@ -20,6 +28,17 @@
         data: function () {
             return {
                 version: "V" + process.env.VUE_APP_VERSION,
+            }
+        },
+        computed: {
+            ...mapGetters([
+                "isAuthenticated"
+            ])
+        },
+        methods: {
+            logout() {
+                auth.logout()
+                this.$router.push({name: "Login"})
             }
         }
     }
@@ -40,10 +59,5 @@
     }
     a {
         color: #42b983;
-    }
-    .title {
-        font-family: Garamond, sans-serif;
-        padding: 5px;
-        alignment: center;
     }
 </style>

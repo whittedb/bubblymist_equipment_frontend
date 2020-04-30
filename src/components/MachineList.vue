@@ -6,7 +6,7 @@
                     <b-form-checkbox v-model="filter.active" inline
                                      value="include_inactive"
                                      unchecked-value="active_only"
-                                     :disabled="inactiveCount === 0">
+                                     :disabled="disabledCount === 0">
                         Show Inactive
                     </b-form-checkbox>
                 </b-col>
@@ -30,7 +30,7 @@
                         <template v-slot:thead-top>
                             <b-tr>
                                 <b-td colspan="10" style="text-align: center">
-                                    <b-link :to="{name: 'CreateMachine', params: {id: null, usedNumbers: usedNumbers}}">
+                                    <b-link :to="{name: 'CreateMachine', params: {id: null}}">
                                         <b-icon-hammer/>
                                     </b-link>
                                     &nbsp;<b>Machines</b>
@@ -41,7 +41,7 @@
                             <b-icon-wrench v-if="data.item['repair_logs'].length > 0" variant="danger"/>
                         </template>
                         <template v-slot:cell(type)="data">
-                            <b-link :to="{name: 'EditMachine', params: {id: data.item.id, usedNumbers: usedNumbers}}">
+                            <b-link :to="{name: 'EditMachine', params: {id: data.item.id}}">
                                 {{ machineFieldFormatter(data.item) }}
                             </b-link>
                         </template>
@@ -79,7 +79,7 @@
                                     </template>
                                     <template v-slot:cell(delete_repair_log)="data">
                                         <b-icon-trash-fill variant="danger" style="text-align: center"
-                                                           @click="deleteRepairLog(data.item.id)"/>
+                                                           @click="deleteRepairLog(data.item)"/>
                                     </template>
                                 </b-table>
                             </b-card>
@@ -88,10 +88,10 @@
                 </b-col>
             </b-row>
             <b-row class="mb-2">
-                <b-col cols="2">Total: {{totalRows}} of {{machineCnt}}</b-col>
+                <b-col cols="2">Total: {{totalRows}} of {{machineCount}}</b-col>
                 <b-col cols="2">Washers: {{washerRows}}</b-col>
                 <b-col cols="2">Dryers: {{dryerRows}}</b-col>
-                <b-col>Inactive: {{inactiveCount}}</b-col>
+                <b-col>Inactive: {{disabledCount}}</b-col>
             </b-row>
             <b-row v-if="error" class="error-row">
                 <b-col>
@@ -108,26 +108,24 @@
 </template>
 
 <script>
+    import {mapGetters, mapMutations, mapActions} from "vuex"
+
     export default {
         name: "MachineList",
         computed: {
-            machineCnt() {
-                return this.machineList.length
-            },
-            usedNumbers() {
-                let used_numbers = {0: [], 1: []}
-                this.machineList.forEach(machine => {
-                    if (machine.active) {
-                        used_numbers[machine.type].push(machine.number)
-                    }
-                })
-                return used_numbers
-            },
-            inactiveCount() {
-                let cnt = 0
-                this.machineList.forEach(machine => cnt += machine.active ? 0 : 1)
-                return cnt
-            }
+            ...mapGetters([
+                "machineList",
+                "repairInfo",
+                "enabledWashers",
+                "enabledDryers",
+                "usedNumbers",
+                "machineCount",
+                "enabledCount",
+                "disabledCount",
+                "getMachineByNumber",
+                "getMachineById",
+                "repairInfo"
+            ])
         },
         data: function () {
             return {
@@ -190,13 +188,21 @@
                     {key: "labor_cost", sortable: true, thStyle: {"text-align": "center"}, tdClass: "bmapp-money"},
                     {key: "delete_repair_log", label: ""}
                 ],
-                machineList: [],
-                repairInfo: {},
                 error: null,
             }
         },
         methods: {
+            ...mapActions([
+                "addMachine",
+                "removeRepairLog"
+            ]),
+            ...mapMutations([
+                "emptyMachineList",
+                "enableMachineDetails",
+                "toggleMachineDetails",
+            ]),
             dataProvider(ctx, callback) {
+                this.emptyMachineList()
                 this.$http.get("/equipment_list/all")
                     .then(response => {
                         response.data.forEach(this.addMachine)
@@ -205,27 +211,6 @@
                         this.updateError(error)
                         callback([])
                     });
-            },
-            addMachine(machine) {
-                machine["_showDetails"] = false
-                this.calculateRepairLogInfo(machine)
-                this.machineList.push(machine)
-            },
-            calculateRepairLogInfo(machine) {
-                let partsCost = 0
-                let laborCost = 0
-                let repairLogs = machine["repair_logs"]
-                for (let i = 0; i < repairLogs.length; ++i) {
-                    partsCost += repairLogs[i]["part_cost"]
-                    laborCost += repairLogs[i]["labor_cost"]
-                }
-                partsCost = partsCost.toFixed(2)
-                laborCost = laborCost.toFixed(2)
-                this.repairInfo[machine.id] = {
-                    numRepairs: repairLogs.length,
-                    partsCost: partsCost,
-                    laborCost: laborCost,
-                }
             },
             handleActiveChange(data) {
                 this.error = null
@@ -238,7 +223,7 @@
                 this.$http.request(options)
                     // eslint-disable-next-line no-unused-vars
                     .then(response => {
-                        if (this.inactiveCount === 0) {
+                        if (this.disabledCount === 0) {
                             this.filter.active = "active_only"
                         }
                     })
@@ -252,9 +237,9 @@
                         this.updateError(error)
                     })
             },
-            deleteRepairLog(repair_log_id) {
+            deleteRepairLog(repair_log) {
                 const options = {
-                    url: `/repair_log/${repair_log_id}`,
+                    url: `/repair_log/${repair_log.id}`,
                     method: "delete",
                 }
                 this.error = null
@@ -262,20 +247,7 @@
                 this.$http.request(options)
                     // eslint-disable-next-line no-unused-vars
                     .then((response) => {
-                        for (let machine_i = 0; machine_i < this.machineList.length; ++machine_i) {
-                            let machine = this.machineList[machine_i]
-                            let logs = machine["repair_logs"]
-                            for (let log_i = 0; log_i < logs.length; ++log_i) {
-                                if (logs[log_i].id === repair_log_id) {
-                                    logs.splice(log_i, 1)
-                                    this.calculateRepairLogInfo(machine)
-                                    if (logs.length === 0) {
-                                        machine["_showDetails"] = false
-                                    }
-                                    break
-                                }
-                            }
-                        }
+                        this.removeRepairLog(repair_log)
                     })
                     .catch((error) => {
                         this.updateError(error)
@@ -290,9 +262,9 @@
             },
             // eslint-disable-next-line no-unused-vars
             onRowSelected(items) {
-                this.machineList.forEach(machine => this.$set(machine, '_showDetails', false))
+                this.machineList.forEach(machine => this.enableMachineDetails({machine, enabled: false}))
                 if (items[0] && items[0]["repair_logs"].length > 0) {
-                    this.$set(items[0], '_showDetails', !items[0]._showDetails)
+                    this.toggleMachineDetails(items[0])
                 }
             },
             customFilter(row, filter) {

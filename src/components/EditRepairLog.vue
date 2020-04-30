@@ -225,7 +225,7 @@
                 this.error = null
             },
             onCancel() {
-                this.$router.push({name: "Home"})
+                this.$router.push({name: "MachineList"})
             },
             watchUpdated() {
                 this.unwatchUpdatedLog = this.$watch("updatedLog", this.dirtyWatcher, {deep: true})
