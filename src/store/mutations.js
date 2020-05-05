@@ -1,6 +1,14 @@
 export default {
-    setAuthenticated(state, {authenticated}) {
-        state.authenticated = authenticated
+    setApiToken(state, {token, expiry}) {
+        state.apiToken = token
+        // Set refresh interval to be 5 minutes before API token expires
+        let interval = expiry - new Date() - (1000 * 60 * 5)
+        // If interval is less than 1 second, use a 10 second interval
+        if (interval < 1000) {
+            interval = 10000
+        }
+        state.refreshInterval = interval
+        state.apiTokenExpiry = expiry
     },
     emptyMachineList(state) {
         state.machineList = []
@@ -47,5 +55,8 @@ export default {
             partsCost: partsCost,
             laborCost: laborCost,
         }})
+    },
+    setRefreshTokenTimerId(state, id) {
+        state.refreshTokenTimerId = id
     }
 }

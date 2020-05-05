@@ -35,6 +35,9 @@
                                     </b-link>
                                     &nbsp;<b>Machines</b>
                                 </b-td>
+                                <b-td>
+                                    <b-icon-arrow-clockwise @click="$refs.machine_list_table.refresh()"/>
+                                </b-td>
                             </b-tr>
                         </template>
                         <template v-slot:cell(wrench)="data">
@@ -109,6 +112,7 @@
 
 <script>
     import {mapGetters, mapMutations, mapActions} from "vuex"
+    import {bus} from "@/main"
 
     export default {
         name: "MachineList",
@@ -208,6 +212,9 @@
                         response.data.forEach(this.addMachine)
                         callback(this.machineList)
                     }).catch(error => {
+                        if (error.response.status === 401) {
+                            bus.$emit("logout")
+                        }
                         this.updateError(error)
                         callback([])
                     });

@@ -14,7 +14,7 @@ import * as rules from "vee-validate/dist/rules"
 import App from "@/components/App.vue"
 import store from "@/store"
 import router from "@/router"
-import api from "@/api"
+import axios from "@/api"
 import auth from "@/auth"
 
 
@@ -36,7 +36,7 @@ router.beforeEach((to, from, next) => {
     }
 })
 
-Vue.prototype.$http = api.api
+Vue.prototype.$http = axios
 
 // Install VeeValidate rules and localization
 Object.keys(rules).forEach(rule => {
@@ -78,6 +78,8 @@ Vue.use(BootstrapVue);
 Vue.use(BootstrapVueIcons);
 
 Vue.config.productionTip = false;
+
+export const bus = new Vue()
 
 new Vue({
     router,

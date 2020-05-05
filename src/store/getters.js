@@ -1,6 +1,15 @@
 export default {
     isAuthenticated(state) {
-        return state.authenticated
+        return state.apiToken !== null
+    },
+    apiToken(state) {
+        return state.apiToken
+    },
+    apiTokenExpiry(state) {
+        return state.apiTokenExpiry
+    },
+    refreshInterval(state) {
+        return state.refreshInterval
     },
     machineList(state) {
         return state.machineList
@@ -40,5 +49,8 @@ export default {
     getMachineForRepairLog: (state) => (repair_log) => {
         let machines = state.machineList.filter(machine => machine.id === repair_log.machine_id)
         return machines.length > 0 ? machines[0] : null
+    },
+    refreshTokenTimerId(state) {
+        return state.refreshTokenTimerId
     }
 }

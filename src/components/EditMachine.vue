@@ -1,5 +1,5 @@
 <template>
-    <b-card id="edit_machine" align="left">
+    <b-card v-if="loaded" id="edit_machine" align="left">
         <template v-slot:header>
             <h2 class="mb-2">{{title}}</h2>
         </template>
@@ -115,9 +115,9 @@
                         <b-button-group>
                             <b-button pill class="mx-2" variant="primary" type="cancel" @click="onCancel">Cancel</b-button>
                             <b-button v-if="!isCreate && formChanged && valid"
-                                      pill class="mx-2" variant="danger" type="submit">Update</b-button>
+                                      pill class="mx-2" variant="success" type="submit">Update</b-button>
                             <b-button v-if="isCreate && formChanged && valid"
-                                      pill class="mx-2" variant="danger" type="submit">Create</b-button>
+                                      pill class="mx-2" variant="success" type="submit">Create</b-button>
                             <b-button v-if="formChanged" pill class="mx-2" variant="warning" type="reset">Reset</b-button>
                         </b-button-group>
                     </b-form-group>
@@ -151,7 +151,9 @@
             if (this.isCreate) {
                 this.updatedMachine = Object.assign({}, this.originalMachine)
                 this.watchUpdated()
+                this.loaded = true
             } else {
+                this.loaded = false
                 this.$http.get(`/equipment/${this.$route.params.id}`)
                     .then((response) => {
                         this.originalMachine = response.data
@@ -160,7 +162,7 @@
                     })
                     .catch((error) => {
                         this.updateError(error)
-                    })
+                    }).finally(() => this.loaded = true)
             }
         },
         computed: {
@@ -190,6 +192,7 @@
         },
         data() {
             return {
+                loaded: false,
                 formChanged: false,
                 unwatchUpdatedMachine: null,
                 updatedMachine: {},
@@ -259,7 +262,7 @@
                 this.$http.request(options)
                     // eslint-disable-next-line no-unused-vars
                     .then((response) => {
-                        this.$router.push({name: "Home"})
+                        this.$router.push({name: "MachineList"})
                     })
                     .catch((error) => {
                         if (error.response.status === 409) {

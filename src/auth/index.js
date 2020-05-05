@@ -1,53 +1,46 @@
 import store from "@/store"
+import axios from "@/api"
+import {bus} from "@/main"
 
 export default {
-    googleAuthToken: "",
-    facebookAuthToken: "",
-    authenticated: false,
-
+    login(access_token, expiry) {
+        this._cancelRefreshTimer()
+        expiry = new Date(expiry)
+        store.commit("setApiToken", {token: access_token, expiry: expiry})
+        this._startRefreshTimer()
+    },
     logout() {
-        localStorage.setItem("googleAuthToken", null)
-        localStorage.setItem("facebookAuthToken", null)
-        this.googleAuthToken = null
-        this.facebookAuthToken = null
-        this.authenticated = false
+        this._cancelRefreshTimer()
+        store.commit("setApiToken", {token: null, expiry: null})
     },
-
-    googleAuthenticate(authToken) {
-        localStorage.setItem("googleAuthToken", authToken)
-        this.googleAuthToken = authToken
-    },
-
-    facebookAuthenticate(authToken) {
-        localStorage.setItem("facebookAuthToken", authToken)
-        this.facebookAuthToken = authToken
-    },
-
-    checkAuth() {
-        this.googleAuthToken = localStorage.getItem("googleAuthToken")
-        this.facebookAuthToken = localStorage.getItem("facebookAuthToken")
-        this.authenticated = !(this.googleAuthToken == null || this.googleAuthToken === "null") ||
-            !(this.facebookAuthToken == null || this.googleAuthToken === "null")
-        store.commit("setAuthenticated", {authenticated: this.authenticated})
-    },
-
     isAuthenticated() {
-        this.checkAuth()
-        return this.authenticated
+        return store.getters.isAuthenticated
     },
-
-    isGoogleAuth() {
-        return this.googleAuthToken != null
+    getApiToken() {
+        return store.getters.apiToken
     },
-    isFacebookAuth() {
-        return this.facebookAuthToken != null
+    _startRefreshTimer() {
+        this._cancelRefreshTimer()
+        let id = setTimeout(() => {
+            axios.get("/refresh", {withCredentials: true})
+                .then((response) => {
+                    if (response.status === 200) {
+                        this.login(response.data.access_token, response.data.expiry)
+                        this._startRefreshTimer()
+                    }
+                }).catch((error) =>{
+                    console.log(error)
+                    bus.$emit("logout")
+                    this._startRefreshTimer()
+            })
+        }, store.getters.refreshInterval != null ? store.getters.refreshInterval : 1000 * 60)
+        store.commit("setRefreshTokenTimerId", id)
     },
-
-    getAuthInfo() {
-        return  {
-            authenticated: this.authenticated,
-            type: this.isGoogleAuth() ? "Google" : this.isFacebookAuth() ? "Facebook" : "None",
-            token: this.isGoogleAuth() ? this.googleAuthToken : this.isFacebookAuth() ? this.facebookAuthToken : null
+    _cancelRefreshTimer() {
+        let id = store.getters.refreshTokenTimerId
+        if (id !== null) {
+            clearTimeout(id)
+            store.commit("setRefreshTokenTimerId", null)
         }
-    },
+    }
 }

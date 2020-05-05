@@ -9,7 +9,10 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
     state: {
-        authenticated: false,
+        apiToken: null,
+        apiTokenExpiry: null,
+        refreshTokenTimerId: null,
+        refreshInterval: 0,
         machineList: [],
         machineCount: [],
         repairInfo: {},
@@ -23,6 +26,7 @@ const store = new Vuex.Store({
 if (module.hot) {
     // accept actions and mutations as hot modules
     module.hot.accept([
+        "./getters",
         "./mutations",
         "./actions"], () => {
         // require the updated modules

@@ -19,6 +19,7 @@
 <script>
     import auth from "@/auth"
     import {mapGetters} from "vuex"
+    import {bus} from "@/main"
 
     export default {
         name: "TitleBar",
@@ -30,6 +31,9 @@
                 version: "V" + process.env.VUE_APP_VERSION,
             }
         },
+        created() {
+            bus.$on("logout", () => { this.logout()})
+        },
         computed: {
             ...mapGetters([
                 "isAuthenticated"
@@ -37,8 +41,11 @@
         },
         methods: {
             logout() {
-                auth.logout()
-                this.$router.push({name: "Login"})
+                this.$http.post("/logout", "", {withCredentials: true})
+                    .then(() => {
+                        auth.logout()
+                        this.$router.push({name: "Login"})
+                    })
             }
         }
     }

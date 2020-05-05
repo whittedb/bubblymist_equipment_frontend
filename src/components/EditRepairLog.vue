@@ -210,7 +210,7 @@
                 this.$http.request(options)
                     // eslint-disable-next-line no-unused-vars
                     .then((response) => {
-                        this.$router.push({name: "Home"})
+                        this.$router.push({name: "MachineList"})
                     })
                     .catch((error) => {
                         this.updateError(error)

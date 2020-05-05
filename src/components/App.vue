@@ -7,7 +7,6 @@
 
 <script>
 import TheTitleBar from "./TheTitleBar.vue"
-import auth from "../auth"
 
 export default {
   name: 'App',
@@ -26,7 +25,6 @@ export default {
     }
   },
   mounted() {
-    auth.checkAuth()
   }
 }
 </script>
