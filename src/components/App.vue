@@ -15,7 +15,7 @@ export default {
   },
   computed: {
     title() {
-      return "Equipment Manager - " + this.env
+      return `Equipment Manager${this.env === "production" ? "" :  " - " + this.env} V${this.version}`
     }
   },
   data() {
