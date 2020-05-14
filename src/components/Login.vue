@@ -69,9 +69,17 @@
                     withCredentials: true,
                     headers: {"X-Login-Token": idToken}})
                     .then((response) => {
-                        if (response.status === 200) {
-                            auth.login(response.data.access_token, response.data.expiry)
-                            this.$router.push({name: "MachineList"})
+                        if (response.status) {
+                            if (response.status === 200) {
+                                auth.login(response.data.access_token, response.data.expiry)
+                                this.$router.push({name: "MachineList"})
+                            }
+                        } else if (response.details) {
+                            this.error = response.details
+                            auth.logout()
+                        } else if (response.error) {
+                            this.error = response.error
+                            auth.logout()
                         }
                     }).catch(error => {
                         this.error = error
