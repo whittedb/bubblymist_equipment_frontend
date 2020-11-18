@@ -47,6 +47,9 @@ export default {
             .forEach(machine => laborCost += state.repairInfo[machine.id].laborCost)
         return laborCost
     },
+    totalRepairCosts(state, getters) {
+        return getters.totalPartsCost + getters.totalLaborCost
+    },
     usedNumbers(state) {
         let used_numbers = {0: [], 1: []}
         state.machineList.filter(machine => machine.active).forEach(machine => {

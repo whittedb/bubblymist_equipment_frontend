@@ -2,7 +2,7 @@
   <b-row class="mb-3 mt-4">
     <b-col class="logo_image" cols="2">
       <b-link to="/">
-        <b-img src="../assets/logo_800x617.png" :alt="version" height="70"></b-img>
+        <b-img src="../assets/logo_800x617.png" height="70"></b-img>
       </b-link>
     </b-col>
     <b-col class="title" cols="9" style="text-align: center">

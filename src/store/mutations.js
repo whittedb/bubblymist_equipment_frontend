@@ -53,8 +53,8 @@ export default {
         state.repairInfo = Object.assign(state.repairInfo, {
             [machine.id]: {
                 numRepairs: repairLogs.length,
-                partsCost: partsCost.toFixed(2),
-                laborCost: laborCost.toFixed(2),
+                partsCost: partsCost,
+                laborCost: laborCost,
             }
         })
     },

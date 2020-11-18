@@ -98,9 +98,9 @@
       </b-row>
       <b-row class="mb-2">
         <b-col>Total Repairs: {{ totalRepairs }}</b-col>
-        <b-col>Total Parts Costs: {{ totalPartsCost }}</b-col>
-        <b-col>Total Labor Costs: {{ totalLaborCost }}</b-col>
-        <b-col>Total Repair Costs: {{ totalPartsCost + totalLaborCost }}</b-col>
+        <b-col>Total Parts Costs: {{ fixedTotalPartsCost }}</b-col>
+        <b-col>Total Labor Costs: {{ fixedTotalLaborCost }}</b-col>
+        <b-col>Total Repair Costs: {{ fixedTotalRepairCosts }}</b-col>
       </b-row>
       <b-row v-if="error" class="error-row">
         <b-col>
@@ -137,8 +137,18 @@ export default {
       "repairInfo",
       "totalRepairs",
       "totalPartsCost",
-      "totalLaborCost"
-    ])
+      "totalLaborCost",
+      "totalRepairCosts"
+    ]),
+    fixedTotalPartsCost() {
+      return this.totalPartsCost.toFixed(2)
+    },
+    fixedTotalLaborCost() {
+      return this.totalLaborCost.toFixed(2)
+    },
+    fixedTotalRepairCosts() {
+      return this.totalRepairCosts.toFixed(2)
+    }
   },
   data: function () {
     return {
