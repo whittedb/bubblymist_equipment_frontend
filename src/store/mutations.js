@@ -48,13 +48,15 @@ export default {
             partsCost += repairLogs[i]["part_cost"]
             laborCost += repairLogs[i]["labor_cost"]
         }
-        partsCost = partsCost.toFixed(2)
-        laborCost = laborCost.toFixed(2)
-        state.repairInfo = Object.assign(state.repairInfo,{ [machine.id]: {
-            numRepairs: repairLogs.length,
-            partsCost: partsCost,
-            laborCost: laborCost,
-        }})
+        // partsCost = partsCost.toFixed(2)
+        // laborCost = laborCost.toFixed(2)
+        state.repairInfo = Object.assign(state.repairInfo, {
+            [machine.id]: {
+                numRepairs: repairLogs.length,
+                partsCost: partsCost,
+                laborCost: laborCost,
+            }
+        })
     },
     setRefreshTokenTimerId(state, id) {
         state.refreshTokenTimerId = id

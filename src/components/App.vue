@@ -1,12 +1,24 @@
 <template>
   <b-container id="app" fluid="xl">
-    <TheTitleBar :title="title"/>
+    <TheTitleBar :title="title" :version="version"/>
     <router-view></router-view>
+    <hr/>
+    <b-row>
+      <b-col class="version" v-if="isAuthenticated">
+        Frontend: V{{version}}
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col class="version" v-if="isAuthenticated">
+        Backend: &nbsp;{{backendVersion}}
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
 <script>
 import TheTitleBar from "./TheTitleBar.vue"
+import {mapGetters} from "vuex";
 
 export default {
   name: 'App',
@@ -14,11 +26,31 @@ export default {
     TheTitleBar,
   },
   computed: {
+    ...mapGetters([
+      "isAuthenticated"
+    ]),
     title() {
-      return `Equipment Manager${this.env === "production" ? "" :  " - " + this.env} V${this.version}`
+      return `Equipment Manager${this.env === "production" ? "" :  " - "  + this.env}`
     }
   },
-  data() {
+  asyncComputed: {
+    backendVersion: {
+      get () {
+        if (this.isAuthenticated) {
+          return this.$http.get('/version')
+              .then(response => {
+                return response.data.version
+              })
+              // eslint-disable-next-line no-unused-vars
+              .catch(error => {
+                return "VError"
+              })
+        }
+      },
+      default: ""
+    }
+  },
+  data: function () {
     return {
       version: process.env.VUE_APP_VERSION,
       env: process.env.NODE_ENV
@@ -85,4 +117,7 @@ body {
 /*  padding: 5px;*/
 /*  alignment: center;*/
 /*}*/
+.version {
+  font-size: 12px;
+}
 </style>

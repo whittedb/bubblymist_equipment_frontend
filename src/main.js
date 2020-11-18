@@ -10,6 +10,7 @@ import {
 } from "vee-validate"
 import en from "vee-validate/dist/locale/en.json"
 import * as rules from "vee-validate/dist/rules"
+import AsyncComputed from "vue-async-computed"
 
 import App from "@/components/App.vue"
 import store from "@/store"
@@ -76,6 +77,7 @@ Vue.component("ValidationProvider", ValidationProvider);
 
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueIcons);
+Vue.use(AsyncComputed);
 
 Vue.config.productionTip = false;
 

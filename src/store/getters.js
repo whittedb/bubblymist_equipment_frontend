@@ -29,6 +29,24 @@ export default {
     enabledDryers(state) {
         return state.machineList.filter(machine => machine.active && machine.type === 1)
     },
+    totalRepairs(state) {
+        let repairCnt = 0
+        state.machineList.filter(machine => machine.active)
+            .forEach(machine => repairCnt += state.repairInfo[machine.id].numRepairs)
+        return repairCnt
+    },
+    totalPartsCost(state) {
+        let partsCost = 0
+        state.machineList.filter(machine => machine.active)
+            .forEach(machine => partsCost += state.repairInfo[machine.id].partsCost)
+        return partsCost
+    },
+    totalLaborCost(state) {
+        let laborCost = 0
+        state.machineList.filter(machine => machine.active)
+            .forEach(machine => laborCost += state.repairInfo[machine.id].laborCost)
+        return laborCost
+    },
     usedNumbers(state) {
         let used_numbers = {0: [], 1: []}
         state.machineList.filter(machine => machine.active).forEach(machine => {
