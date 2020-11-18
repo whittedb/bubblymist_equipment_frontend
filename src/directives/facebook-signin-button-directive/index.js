@@ -11,17 +11,20 @@ export default Vue.directive('facebook-signin-button', {
         facebookSignInAPI.onload = InitFacebookButton
 
         function InitFacebookButton() {
+            // eslint-disable-next-line no-undef
             FB.init({
                 appId: appId,
                 xfbml: true,
                 version: 'v3.1'
             })
+            // eslint-disable-next-line no-undef
             FB.logout()
         }
 
         el.addEventListener('click', PopUp)
 
         function PopUp() {
+            // eslint-disable-next-line no-undef
             FB.login(function (facebookResponse) {
                 if (facebookResponse.status === 'connected') {
                     OnSuccess(facebookResponse.authResponse.accessToken)
